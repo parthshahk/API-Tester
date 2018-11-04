@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons' rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="./JsonTreeBuilder.css">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
         <title>API Tester</title>
         <style>
@@ -23,7 +24,7 @@
                 </v-toolbar>
 
                 <v-content>
-                    <v-container text-xs-center>
+                    <v-container grid-list-md>
                         
                         <v-layout wrap row>
 
@@ -38,6 +39,39 @@
                                 </v-btn>
                             </v-flex>
 
+                        </v-layout>
+
+                        <v-layout wrap row>
+                                <v-flex xs4>
+                                    <v-card>
+                                        <v-card-title>
+                                            <h3>Status : </h3>
+                                            <h3 v-text="response.status"></h3>
+                                        </v-card-title>
+                                    </v-card>
+                                </v-flex>
+                                <v-flex xs4>
+                                    <v-card>
+                                        <v-card-title>
+                                            <h3>Status Text : </h3>
+                                            <h3 v-text="response.statusText"></h3>
+                                        </v-card-title>
+                                    </v-card>
+                                </v-flex>
+                                <v-flex xs4>
+                                    <v-card>
+                                        <v-card-title>
+                                            <h3>Time : </h3>
+                                            <h3 v-text="lastTime + ' ms'"></h3>
+                                        </v-card-title>
+                                    </v-card>
+                                </v-flex>
+                        </v-layout>
+
+                        <v-layout>
+                            <v-flex>
+                                <div id="placeholder"></div>
+                            </v-flex>
                         </v-layout>
 
 
@@ -59,6 +93,8 @@
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script src="./JsonTreeBuilder.js"></script>
         <script>
             new Vue({
                 el: '#app',
@@ -67,7 +103,8 @@
                     baseUrl: '',
                     ajaxState:'',
                     response:'',
-                    lastTime:''
+                    lastTime:'',
+                    tree:''
                 },
 
                 methods: {
@@ -78,10 +115,15 @@
 
                         self.ajaxState = 'loading';
 
+                        $('div#placeholder').empty();
+
                         axios.get(self.baseUrl)
                             .then(function(response){
                                 self.response = response;
                                 self.lastTime = Math.round(performance.now() - start);
+                                var treeBuilder = new JsonTreeBuilder();
+                                self.tree = treeBuilder.build(self.response.data);
+                                $('div#placeholder').append(self.tree);
                             })
                             .catch(function (error) {
                                 console.log(error);

@@ -41,6 +41,25 @@
 
                         </v-layout>
 
+                        <v-layout>
+                            <v-flex xs12>
+                                <v-btn depressed color="warning" @click="param.push({id:param.length, name:'', value:''})">Add Param</v-btn>
+                            </v-flex>
+                            <v-flex xs12>
+                                <v-btn depressed color="error" @click="param.pop()">Remove Param</v-btn>
+                            </v-flex>
+                        </v-layout>
+
+                        <v-layout v-for="instance in param" :key="instance.id">
+                            <v-flex xs3>
+                                <v-text-field solo label="Key" v-model="instance.name"></v-text-field>
+                            </v-flex>
+
+                            <v-flex xs3>
+                                <v-text-field solo label="Value" v-model="instance.value"></v-text-field>
+                            </v-flex>
+                        </v-layout>
+                        <br><br>
                         <v-layout wrap row>
                                 <v-flex xs4>
                                     <v-card>
@@ -104,7 +123,14 @@
                     ajaxState:'',
                     response:'',
                     lastTime:'',
-                    tree:''
+                    tree:'',
+                    param:[
+                        {
+                            id: 0,   
+                            name: "",
+                            value:""
+                        }
+                    ]
                 },
 
                 methods: {
@@ -117,7 +143,9 @@
 
                         $('div#placeholder').empty();
 
-                        axios.get(self.baseUrl)
+                        var url = self.finalURL();
+
+                        axios.get(url)
                             .then(function(response){
                                 self.response = response;
                                 self.lastTime = Math.round(performance.now() - start);
@@ -131,6 +159,19 @@
                             .then(function () {
                                 self.ajaxState = '';
                             });
+                    },
+
+                    finalURL: function(){
+
+                        var i, url = this.baseUrl;
+                        url+='?';
+                        for(i=0; i<this.param.length; i++){
+                            if(url.slice(-1) != '?'){
+                                url += '&'
+                            }
+                            url += this.param[i].name + '=' + this.param[i].value;
+                        }
+                        return url;
                     }
                 }
             });

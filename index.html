@@ -6,10 +6,15 @@
         <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
         <title>API Tester</title>
+        <style>
+            [v-cloak] {
+                display: none;
+            }
+        </style>
     </head>
     <body>
         <div id="app">
-            <v-app>
+            <v-app v-cloak>
 
                 <v-toolbar color="primary" dark flat>
                     <v-spacer></v-spacer>
@@ -18,23 +23,28 @@
                 </v-toolbar>
 
                 <v-content>
-                    <v-container>
+                    <v-container text-xs-center>
+                        
+                        <v-layout wrap row>
 
-                        <v-layout>
-
-                            <v-flex>
-                            
-                                <v-text-field solo label="URL"></v-text-field>
-                                <v-btn>GET</v-btn>
-
+                            <v-flex sm10 xs12>
+                                <v-text-field solo label="Base URL" v-model="baseUrl"></v-text-field>
                             </v-flex>
+
+                            <v-flex sm2 xs12>
+                                <v-btn color="secondary" large outline @click="fetch()">
+                                    <span v-show="ajaxState!='loading'">GET</span>
+                                    <v-progress-circular indeterminate color="error" v-show="ajaxState=='loading'"></v-progress-circular>
+                                </v-btn>
+                            </v-flex>
+
                         </v-layout>
 
 
 
 
                     </v-container>
-                </v-content>
+                </v-content>  
 
                 <v-footer dark>
                     <v-spacer></v-spacer>
@@ -48,9 +58,39 @@
         
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <script>
             new Vue({
-                el: '#app'
+                el: '#app',
+                
+                data: {
+                    baseUrl: '',
+                    ajaxState:'',
+                    response:'',
+                    lastTime:''
+                },
+
+                methods: {
+                    fetch: function(){
+
+                        var start = performance.now();
+                        var self = this;
+
+                        self.ajaxState = 'loading';
+
+                        axios.get(self.baseUrl)
+                            .then(function(response){
+                                self.response = response;
+                                self.lastTime = Math.round(performance.now() - start);
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            })
+                            .then(function () {
+                                self.ajaxState = '';
+                            });
+                    }
+                }
             });
             
         </script>
